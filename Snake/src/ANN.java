@@ -32,18 +32,26 @@ public class ANN extends JPanel{
 		outputs = 3;
 		
 		for(int i = 0; i<inputs;i++)
-			nodes.get(0).add(new Node(true, 0));
+			this.addNewNode(0, i, 0,false);
 		for(int i =0; i< outputs;i++)
-			nodes.get(nodes.size()-1).add(new Node(true,0));
+			this.addNewNode(1, i, 0,false);
 		
 		int randAmt = 4;
 		
 		for(int i = (int) (randAmt*Math.random());i<randAmt;i++){
-			nodes.add(nodes.size()-1, new ArrayList<Node>());
-			for(int p = (int) (randAmt*Math.random()); p<randAmt;p++){
-				nodes.get(nodes.size()-2).add(new Node(true,0));
+			for(int p = (int) (randAmt*Math.random()), m = p; p<randAmt;p++){
+				Node n;
+				if(p==m)
+					n = this.addNewNode(i, p, 0, true);
+				else
+					n = this.addNewNode(i, p, 0, false);
+				while(n == null)
+					n = this.addNewNode(i, p, 0, false);
+				
 			}
 		}
+		
+		this.addNewNode(1, 0, 0, true);
 	
 		
 		
@@ -60,13 +68,59 @@ public class ANN extends JPanel{
 		
 	}
 	
-	public void addNewNode(Dendrite d){
+	public void addRandomNode(Node node){
 		
 	}
 	
-	public void addNewDendrite(Dendrite d){
+	public Node addNewNode(int x, int y, int age, boolean insert){
+		Node n = null;
+		
+		if(!insert){
+			if(x >= 0 && x <= nodes.size()-1){
+				 n = new Node(true, age);
+				if(y>=0 && y<=nodes.get(x).size()-1)
+					nodes.get(x).add(n);
+				else
+					nodes.get(x).add(n);
+			}else if(x>0 && x==nodes.size()){
+				n = new Node(true, age);
+				nodes.add(new ArrayList<Node>());
+				nodes.get(nodes.size()-1).add(n);
+			}
+		}else{
+			n = new Node(true, age);
+			if(x>=0 && x <=nodes.size()-1){
+				nodes.add(x, new ArrayList<Node>());
+				nodes.get(x).add(n);
+			}
+		}
+		
+		if(n!= null){
+			if(x<nodes.size()-2){
+				Node output = nodes.get(x+1).get((int) ((nodes.get(x+1).size()-1)*Math.random()));
+				n.addNewOutput(new Dendrite(n,output));
+			}
+			if(x>0){
+				Node output = nodes.get(x-1).get((int) ((nodes.get(x-1).size()-1)*Math.random()));
+				output.addNewOutput(new Dendrite(output,n));
+			}
+		}
+		
+		return n;
+	}
+	
+	public void addNewNode(Node node, int x, int y, int age, Node input, Node output){
 		
 	}
+	
+	public void addRandomDendrite(Dendrite den){
+		
+	}
+	
+	public void addNewDendrite(Dendrite den){
+		
+	}
+	
 	
 	public void paintComponent(Graphics g){
 		int distX = frame.getWidth()/(nodes.size()+1);
