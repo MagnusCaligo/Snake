@@ -52,7 +52,7 @@ public class ANN extends JPanel implements KeyListener{
 //		}
 		
 		this.addNewNode(1, 0, 0, true);
-		
+		this.addNodeAtDen(dendrites.get((int)(dendrites.size()*Math.random())));
 		
 		
 		frame = new JFrame();
@@ -98,12 +98,16 @@ public class ANN extends JPanel implements KeyListener{
 			if(x<nodes.size()-1){
 				System.out.println();
 				Node output = nodes.get(x+1).get((int)(Math.random()*nodes.get(x+1).size()));
-				n.addNewOutput(new Dendrite(n,output));
+				Dendrite den = new Dendrite(n,output);
+				n.addNewOutput(den);
+				dendrites.add(den);
 			}
 			if(x>0){
 				ArrayList<Node> outputlist = nodes.get(x-1);
 				Node output = outputlist.get((int)(Math.random()*nodes.get(x-1).size()));
-				output.addNewOutput(new Dendrite(output,n));
+				Dendrite den = new Dendrite(output, n);
+				output.addNewOutput(den);
+				dendrites.add(den);
 			}
 		}
 		
@@ -111,18 +115,30 @@ public class ANN extends JPanel implements KeyListener{
 	}
 	
 	public void addNodeAtDen(Dendrite den){
-		for(int x = 0; x < nodes.size()-1; x++){
-			for(int y = 0; y <nodes.size()-1; y++){
+		double inputX = 0;
+		double outputX = 0;
+		for(int x = 0; x < nodes.size(); x++){
+			for(int y = 0; y <nodes.get(x).size(); y++){
 				if(nodes.get(x).get(y) == den.inputNode){
-					
-					//TODO
-					//This is what I was working on
-					//I want to something like xDiff = output.x - input.x
-					//Then xDiff/2
-					//and create a new node at xDiff (possibly new coloumn)
-					
+					inputX = x;
 				}
 			}
+		}
+		for(int x = 0; x < nodes.size(); x++){
+			for(int y = 0; y <nodes.get(x).size(); y++){
+				if(nodes.get(x).get(y) == den.outputNode){
+					outputX = x;
+				}
+			}
+		}
+		den.active = false;
+		double xDif = outputX - inputX;
+		if(xDif%2!=0){
+			int xloc = (int) Math.ceil(xDif/2);
+			Node n = new Node(0);
+		}else{
+			int xloc = (int) (xDif/2);
+			
 		}
 	}
 	
@@ -149,7 +165,7 @@ public class ANN extends JPanel implements KeyListener{
 								
 					for(int xN = 0; xN < nodes.size();xN++){
 						for(int yN =0; yN <nodes.get(xN).size(); yN++){
-							if(n==nodes.get(xN).get(yN)){
+							if(n==nodes.get(xN).get(yN) && d.active){
 								int dY = frame.getHeight()/(nodes.get(xN).size()+1);
 								g.setColor(Color.green);
 								g.drawLine(distX+(i*distX), distY+(m*distY), distX + (xN*distX), dY+(yN*dY));
@@ -222,6 +238,7 @@ public class ANN extends JPanel implements KeyListener{
 			inputNode = m;
 			outputNode = n;
 			weight = Math.random();
+			active = true;
 		}
 		
 		public void getInput(double input){
@@ -237,9 +254,7 @@ public class ANN extends JPanel implements KeyListener{
 	public void keyPressed(KeyEvent event) {
 		switch(event.getKeyCode()){
 		case KeyEvent.VK_SPACE:
-			int x = (int)(Math.random()*nodes.size());
-			int y = (int)(Math.random()*nodes.get(x).size());
-			this.addNewNode(x, y, 0, false);
+			this.addNodeAtDen(dendrites.get((int)(dendrites.size()*Math.random())));
 			frame.repaint();
 			break;
 		}
