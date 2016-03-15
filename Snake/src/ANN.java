@@ -1,11 +1,13 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class ANN extends JPanel{
+public class ANN extends JPanel implements KeyListener{
 	
 	private ArrayList<ArrayList<Node>> nodes;
 	private ArrayList<Dendrite> dendrites;
@@ -23,8 +25,6 @@ public class ANN extends JPanel{
 	
 		
 		nodes = new ArrayList<ArrayList<Node>>();
-		nodes.add(new ArrayList<Node>());
-		nodes.add(new ArrayList<Node>());
 		
 		dendrites = new ArrayList<Dendrite>();
 		
@@ -38,22 +38,20 @@ public class ANN extends JPanel{
 		
 		int randAmt = 4;
 		
-		for(int i = (int) (randAmt*Math.random());i<randAmt;i++){
-			for(int p = (int) (randAmt*Math.random()), m = p; p<randAmt;p++){
-				Node n;
-				if(p==m)
-					n = this.addNewNode(i, p, 0, true);
-				else
-					n = this.addNewNode(i, p, 0, false);
-				while(n == null)
-					n = this.addNewNode(i, p, 0, false);
-				
-			}
-		}
+//		for(int i = (int) (randAmt*Math.random());i<randAmt;i++){
+//			for(int p = (int) (randAmt*Math.random()), m = p; p<randAmt;p++){
+//				Node n;
+//				if(p==m)
+//					n = this.addNewNode(i, p, 0, true);
+//				else
+//					n = this.addNewNode(i, p, 0, false);
+//				while(n == null)
+//					n = this.addNewNode(i, p, 0, false);
+//				
+//			}
+//		}
 		
 		this.addNewNode(1, 0, 0, true);
-	
-		
 		
 		
 		
@@ -64,6 +62,7 @@ public class ANN extends JPanel{
 		frame.setVisible(true);
 		
 		frame.add(this);
+		frame.addKeyListener(this);
 		this.setVisible(true);
 		
 	}
@@ -77,18 +76,18 @@ public class ANN extends JPanel{
 		
 		if(!insert){
 			if(x >= 0 && x <= nodes.size()-1){
-				 n = new Node(true, age);
+				 n = new Node(age);
 				if(y>=0 && y<=nodes.get(x).size()-1)
 					nodes.get(x).add(n);
 				else
 					nodes.get(x).add(n);
-			}else if(x>0 && x==nodes.size()){
-				n = new Node(true, age);
+			}else if(x>=0 && x==nodes.size()){
+				n = new Node(age);
 				nodes.add(new ArrayList<Node>());
 				nodes.get(nodes.size()-1).add(n);
 			}
 		}else{
-			n = new Node(true, age);
+			n = new Node(age);
 			if(x>=0 && x <=nodes.size()-1){
 				nodes.add(x, new ArrayList<Node>());
 				nodes.get(x).add(n);
@@ -96,12 +95,14 @@ public class ANN extends JPanel{
 		}
 		
 		if(n!= null){
-			if(x<nodes.size()-2){
-				Node output = nodes.get(x+1).get((int) ((nodes.get(x+1).size()-1)*Math.random()));
+			if(x<nodes.size()-1){
+				System.out.println();
+				Node output = nodes.get(x+1).get((int)(Math.random()*nodes.get(x+1).size()));
 				n.addNewOutput(new Dendrite(n,output));
 			}
 			if(x>0){
-				Node output = nodes.get(x-1).get((int) ((nodes.get(x-1).size()-1)*Math.random()));
+				ArrayList<Node> outputlist = nodes.get(x-1);
+				Node output = outputlist.get((int)(Math.random()*nodes.get(x-1).size()));
 				output.addNewOutput(new Dendrite(output,n));
 			}
 		}
@@ -109,8 +110,20 @@ public class ANN extends JPanel{
 		return n;
 	}
 	
-	public void addNewNode(Node node, int x, int y, int age, Node input, Node output){
-		
+	public void addNodeAtDen(Dendrite den){
+		for(int x = 0; x < nodes.size()-1; x++){
+			for(int y = 0; y <nodes.size()-1; y++){
+				if(nodes.get(x).get(y) == den.inputNode){
+					
+					//TODO
+					//This is what I was working on
+					//I want to something like xDiff = output.x - input.x
+					//Then xDiff/2
+					//and create a new node at xDiff (possibly new coloumn)
+					
+				}
+			}
+		}
 	}
 	
 	public void addRandomDendrite(Dendrite den){
@@ -155,13 +168,11 @@ public class ANN extends JPanel{
 	
 	private class Node{
 		
-		private boolean active;
 		private int age; 
 		public ArrayList<Double> input;
 		public ArrayList<Dendrite> outputs;
 		
-		public Node(boolean a, int m){
-			active = a;
+		public Node(int m){
 			age = m;
 			
 			input = new ArrayList<Double>();
@@ -205,6 +216,7 @@ public class ANN extends JPanel{
 		private double weight;
 		public Node inputNode;
 		public Node outputNode;
+		public boolean active;
 		
 		public Dendrite(Node m,Node n){
 			inputNode = m;
@@ -220,6 +232,28 @@ public class ANN extends JPanel{
 		public Node getNode(){
 			return outputNode;
 		}
+	}
+
+	public void keyPressed(KeyEvent event) {
+		switch(event.getKeyCode()){
+		case KeyEvent.VK_SPACE:
+			int x = (int)(Math.random()*nodes.size());
+			int y = (int)(Math.random()*nodes.get(x).size());
+			this.addNewNode(x, y, 0, false);
+			frame.repaint();
+			break;
+		}
+		
+	}
+
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
