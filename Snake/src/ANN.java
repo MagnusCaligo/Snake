@@ -52,7 +52,8 @@ public class ANN extends JPanel implements KeyListener{
 //		}
 		
 		this.addNewNode(1, 0, 0, true);
-		this.addNodeAtDen(dendrites.get((int)(dendrites.size()*Math.random())));
+		//this.addNodeAtDen(dendrites.get((int)(dendrites.size()*Math.random())));
+		this.addNodeAtDen(nodes.get(0).get(0).outputs.get(0));
 		
 		
 		frame = new JFrame();
@@ -115,6 +116,8 @@ public class ANN extends JPanel implements KeyListener{
 	}
 	
 	public void addNodeAtDen(Dendrite den){
+		if(!den.active)
+			return;
 		double inputX = 0;
 		double outputX = 0;
 		for(int x = 0; x < nodes.size(); x++){
@@ -133,12 +136,24 @@ public class ANN extends JPanel implements KeyListener{
 		}
 		den.active = false;
 		double xDif = outputX - inputX;
+		System.out.println(outputX+" : "+inputX);
 		if(xDif%2!=0){
 			int xloc = (int) Math.ceil(xDif/2);
 			Node n = new Node(0);
+			n.outputs.add(new Dendrite(n, den.outputNode));
+			Dendrite newDen = new Dendrite(den.outputNode, n);
+			den.inputNode.outputs.add(new Dendrite(den.outputNode, n));
+			dendrites.add(newDen);
+			nodes.add(xloc, new ArrayList<Node>());
+			nodes.get(xloc).add(n);
 		}else{
 			int xloc = (int) (xDif/2);
-			
+			Node n = new Node(0);
+			n.outputs.add(new Dendrite(n, den.outputNode));
+			Dendrite newDen = new Dendrite(den.outputNode, n);
+			dendrites.add(newDen);
+			den.inputNode.outputs.add(newDen);
+			nodes.get(xloc).add(n);
 		}
 	}
 	
@@ -254,7 +269,11 @@ public class ANN extends JPanel implements KeyListener{
 	public void keyPressed(KeyEvent event) {
 		switch(event.getKeyCode()){
 		case KeyEvent.VK_SPACE:
-			this.addNodeAtDen(dendrites.get((int)(dendrites.size()*Math.random())));
+			Dendrite den = dendrites.get(0);
+			while(!den.active){
+				den = dendrites.get((int)(Math.random() * dendrites.size()));
+			}
+			this.addNodeAtDen(den);
 			frame.repaint();
 			break;
 		}
