@@ -14,6 +14,7 @@ public class ANN extends JPanel implements KeyListener{
 	private JFrame frame;
 	private int inputs;
 	private int outputs;
+	private int age;
 	
 	
 	public static void main(String args[]){
@@ -30,10 +31,14 @@ public class ANN extends JPanel implements KeyListener{
 		inputs = 3;
 		outputs = 3;
 		
-		for(int i = 0; i<inputs;i++)
-			this.addNewNode(0, i, 0,false);
-		for(int i =0; i< outputs;i++)
-			this.addNewNode(1, i, 0,false);
+		for(int i = 0; i<inputs;i++){
+			this.addNewNode(0, i, age,false);
+			age++;
+		}
+		for(int i =0; i< outputs;i++){
+			this.addNewNode(1, i, age,false);
+			age++;
+		}
 
 		
 		frame = new JFrame();
@@ -124,10 +129,12 @@ public class ANN extends JPanel implements KeyListener{
 		if(xDif%2!=0){
 			int xloc = (int) Math.ceil(xDif/2);	
 			xloc += inputX;
-			Node n = new Node(0);
+			Node n = new Node(age);
+			age++;
 			
 			Dendrite newOutput = new Dendrite(n, den.outputNode);
 			Dendrite newInput = new Dendrite(den.inputNode, n);
+			newOutput.weight = 1;
 			
 			den.inputNode.addNewOutput(newInput);;
 			n.addNewOutput(newOutput);
@@ -141,7 +148,8 @@ public class ANN extends JPanel implements KeyListener{
 		}else{
 			int xloc = (int) (xDif/2);
 			xloc += inputX;
-			Node n = new Node(0);
+			Node n = new Node(age);
+			age++;
 			Dendrite newOutput = new Dendrite(n,den.outputNode);
 			Dendrite newInput = new Dendrite(den.inputNode,n);
 			
@@ -292,15 +300,15 @@ public class ANN extends JPanel implements KeyListener{
 		switch(event.getKeyCode()){
 		case KeyEvent.VK_SPACE:
 			
-//			if(Math.random()>.9){
-//				Dendrite den = dendrites.get((int)(Math.random()*dendrites.size()));
-//				while(!den.active){
-//					den = dendrites.get((int)(Math.random()*dendrites.size()));
-//				}
-//				this.addNodeAtDen(den);
-//			}else{
-//				this.addRandomDendrite();
-//			}
+			if(Math.random()>.9){
+				Dendrite den = dendrites.get((int)(Math.random()*dendrites.size()));
+				while(!den.active){
+					den = dendrites.get((int)(Math.random()*dendrites.size()));
+				}
+				this.addNodeAtDen(den);
+			}else{
+				this.addRandomDendrite();
+			}
 			
 			this.update();
 			frame.repaint();
