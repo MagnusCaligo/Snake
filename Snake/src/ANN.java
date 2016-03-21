@@ -3,18 +3,20 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class ANN extends JPanel implements KeyListener{
 	
-	private ArrayList<ArrayList<Node>> nodes;
-	private ArrayList<Dendrite> dendrites;
+	public ArrayList<ArrayList<Node>> nodes;
+	public ArrayList<Dendrite> dendrites;
 	
 	private JFrame frame;
 	private int inputs;
 	private int outputs;
-	private int age;
+	private int dendriteAge;
+	private int nodeAge;
 	
 	
 	public static void main(String args[]){
@@ -32,12 +34,12 @@ public class ANN extends JPanel implements KeyListener{
 		outputs = 3;
 		
 		for(int i = 0; i<inputs;i++){
-			this.addNewNode(0, i, age,false);
-			age++;
+			this.addNewNode(0, i, dendriteAge,false);
+			dendriteAge++;
 		}
 		for(int i =0; i< outputs;i++){
-			this.addNewNode(1, i, age,false);
-			age++;
+			this.addNewNode(1, i, dendriteAge,false);
+			dendriteAge++;
 		}
 
 		
@@ -57,28 +59,28 @@ public class ANN extends JPanel implements KeyListener{
 		for(int x = 0; x < nodes.size(); x++){
 			for(int y = 0; y < nodes.get(x).size(); y++){
 			
-				System.out.println(x+" : "+ y + " : " + nodes.get(x).get(y).output());
+				nodes.get(x).get(y).output();
 			}
 		}
 	}
 	
-	public Node addNewNode(int x, int y, int age, boolean insert){
+	public Node addNewNode(int x, int y, int dendriteAge, boolean insert){
 		Node n = null;
 		
 		if(!insert){
 			if(x >= 0 && x <= nodes.size()-1){
-				 n = new Node(age);
+				 n = new Node(nodeAge); nodeAge++;;
 				if(y>=0 && y<=nodes.get(x).size()-1)
 					nodes.get(x).add(n);
 				else
 					nodes.get(x).add(n);
 			}else if(x>=0 && x==nodes.size()){
-				n = new Node(age);
+				n = new Node(nodeAge); nodeAge++;;
 				nodes.add(new ArrayList<Node>());
 				nodes.get(nodes.size()-1).add(n);
 			}
 		}else{
-			n = new Node(age);
+			n = new Node(nodeAge); nodeAge++;;
 			if(x>=0 && x <=nodes.size()-1){
 				nodes.add(x, new ArrayList<Node>());
 				nodes.get(x).add(n);
@@ -89,14 +91,16 @@ public class ANN extends JPanel implements KeyListener{
 			if(x<nodes.size()-1){
 				System.out.println();
 				Node output = nodes.get(x+1).get((int)(Math.random()*nodes.get(x+1).size()));
-				Dendrite den = new Dendrite(n,output);
+				Dendrite den = new Dendrite(n,output,dendriteAge);
+				dendriteAge++;
 				n.addNewOutput(den);
 				dendrites.add(den);
 			}
 			if(x>0){
 				ArrayList<Node> outputlist = nodes.get(x-1);
 				Node output = outputlist.get((int)(Math.random()*nodes.get(x-1).size()));
-				Dendrite den = new Dendrite(output, n);
+				Dendrite den = new Dendrite(output, n,dendriteAge);
+				dendriteAge++;
 				output.addNewOutput(den);
 				dendrites.add(den);
 			}
@@ -129,11 +133,12 @@ public class ANN extends JPanel implements KeyListener{
 		if(xDif%2!=0){
 			int xloc = (int) Math.ceil(xDif/2);	
 			xloc += inputX;
-			Node n = new Node(age);
-			age++;
+			Node n = new Node(nodeAge); nodeAge++;;
 			
-			Dendrite newOutput = new Dendrite(n, den.outputNode);
-			Dendrite newInput = new Dendrite(den.inputNode, n);
+			Dendrite newOutput = new Dendrite(n, den.outputNode,dendriteAge);
+			dendriteAge++;
+			Dendrite newInput = new Dendrite(den.inputNode, n,dendriteAge);
+			dendriteAge++;
 			newOutput.weight = 1;
 			
 			den.inputNode.addNewOutput(newInput);;
@@ -148,10 +153,11 @@ public class ANN extends JPanel implements KeyListener{
 		}else{
 			int xloc = (int) (xDif/2);
 			xloc += inputX;
-			Node n = new Node(age);
-			age++;
-			Dendrite newOutput = new Dendrite(n,den.outputNode);
-			Dendrite newInput = new Dendrite(den.inputNode,n);
+			Node n = new Node(nodeAge); nodeAge++;;
+			Dendrite newOutput = new Dendrite(n,den.outputNode,dendriteAge);
+			dendriteAge++;
+			Dendrite newInput = new Dendrite(den.inputNode,n,dendriteAge);
+			dendriteAge++;
 			
 			den.inputNode.addNewOutput(newInput);
 			n.addNewOutput(newOutput);
@@ -186,7 +192,9 @@ public class ANN extends JPanel implements KeyListener{
 			}
 		}
 		
-		Dendrite den = new Dendrite(inputNode, outputNode);
+		System.out.println("Adding New Dendrite from " + x + ","+y+" to " + secondX+","+secondY);
+		Dendrite den = new Dendrite(inputNode, outputNode,dendriteAge);
+		dendriteAge++;
 		dendrites.add(den);
 		
 		inputNode.addNewOutput(den);
@@ -224,89 +232,19 @@ public class ANN extends JPanel implements KeyListener{
 		}
 	}
 	
-	
-	private class Node{
-		
-		private int age; 
-		public ArrayList<Double> input;
-		private ArrayList<Dendrite> outputs;
-		
-		public Node(int m){
-			age = m;
-			
-			input = new ArrayList<Double>();
-			outputs = new ArrayList<Dendrite>();
-		}
-		
-		public void addNewOutput(Dendrite d){
-			outputs.add(d);
-		}
-		
-		
-		public void addToInput(double b){
-			input.add(b);
-		}
-		
-		public double output(){
-			double value = 0;
-			for(double val : input){
-				value += val;
-			}
-			
-			value =  Math.tanh(value);
-			
-			for(Dendrite d : outputs){
-				d.getInput(value);
-			}
-			
-			input = new ArrayList<Double>();
-			return value;
-		}
-		
-		public void update(){
-			output();
-		}
-		
-		
-	}
-	
-	private class Dendrite{
-		
-		private double weight;
-		public Node inputNode;
-		public Node outputNode;
-		public boolean active;
-		
-		public Dendrite(Node m,Node n){
-			inputNode = m;
-			outputNode = n;
-			weight = Math.random();
-			active = true;
-		}
-		
-		public Dendrite(Node m, Node n, double w){
-			this(m,n);
-			this.weight = w;
-		}
-		
-		public void getInput(double input){
-			double output = weight*input;
-			outputNode.addToInput(output);
-		}
-		
-	}
 
 	public void keyPressed(KeyEvent event) {
 		switch(event.getKeyCode()){
 		case KeyEvent.VK_SPACE:
 			
-			if(Math.random()>.9){
+			double chance = Math.random();
+			if(chance>.9){
 				Dendrite den = dendrites.get((int)(Math.random()*dendrites.size()));
 				while(!den.active){
 					den = dendrites.get((int)(Math.random()*dendrites.size()));
 				}
 				this.addNodeAtDen(den);
-			}else{
+			}else if(chance >.5){
 				this.addRandomDendrite();
 			}
 			
