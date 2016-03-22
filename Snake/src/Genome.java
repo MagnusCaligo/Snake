@@ -65,34 +65,99 @@ public class Genome {
 	public static ANN buildANN(Genome genome){
 		
 		ArrayList<ArrayList<Node>> nodes = new ArrayList<ArrayList<Node>>();
+		ArrayList<Dendrite> dendrites = new ArrayList<Dendrite>();
 		int age = 0;
 		
 		for(int i =0; i < genome.type.size(); i++){
 			if(genome.type.get(i) == 1){
-				if(nodes.size() ==0)
-					nodes.add(new ArrayList<Node>());
-				nodes.get(0).add(new Node(age));
-				age++;
+				boolean created = false;
+				for(int m = 0; m < i; m++){
+					if(genome.inputs.get(m) == genome.inputs.get(i))
+						created = true;
+				}
+				if(!created){
+					if(nodes.size() ==0)
+						nodes.add(new ArrayList<Node>());
+					nodes.get(0).add(new Node(age));
+					age++;
+				}	
 			}
 			else if(genome.type.get(i)==2){
-				if(nodes.size() < 1)
-					nodes.add(new ArrayList<Node>());
-				nodes.get(nodes.size()-1).add(new Node(age));
-				age++;
+				boolean created = false;
+				for(int m = 0; m < i; m++){
+					if(genome.outputs.get(m) == genome.outputs.get(i))
+						created = true;
+				}
+				if(!created){
+					if(nodes.size() < 1)
+						nodes.add(new ArrayList<Node>());
+					nodes.get(nodes.size()-1).add(new Node(age));
+					age++;
+				}
 			}
 			else if(genome.type.get(i)==3){
-				if(nodes.size()-1 <0){
-					nodes.add(new ArrayList<Node>());
-					nodes.add(new ArrayList<Node>());
+				
+				boolean inputCreated = false;
+				boolean outputCreated = false;
+				
+				for(int m = 0; m < i; m++){
+					if(genome.inputs.get(m) == genome.inputs.get(i))
+						inputCreated = true;
 				}
-				nodes.get(0).add(new Node(age));
-				age++;
-				nodes.get(nodes.size()-1).add(new Node(age));
-				age++;
+				for(int m = 0; m < i; m++){
+					if(genome.outputs.get(m) == genome.outputs.get(i))
+						outputCreated = true;
+				}
+				if(!inputCreated && nodes.size()-1 <0){
+					nodes.add(new ArrayList<Node>());
+					nodes.get(0).add(new Node(age));
+					age++;
+				}
+				if(!outputCreated && nodes.size()-1<0){
+					nodes.add(new ArrayList<Node>());				
+					nodes.get(nodes.size()-1).add(new Node(age));
+					age++;
+				}
 			}
 		}
 		
-		return new ANN(nodes);
+//		for(int i = 0; i < genome.inputs.size(); i++){
+//			
+//			Node inputNode;
+//			int xLoc = 0;
+//			for(int x = 0; x < nodes.size(); x++){
+//				for(int y = 0; y < nodes.get(x).size(); y++){
+//					if(nodes.get(x).get(y).age == genome.inputs.get(i)){
+//						inputNode = nodes.get(x).get(y);
+//						xLoc = x;
+//					}
+//				}
+//			}
+//			
+//			Node outputNode=null;
+//			for(ArrayList<Node> lis: nodes){
+//				for(Node node: lis){
+//					if(node.age == genome.outputs.get(i)){
+//						outputNode = node;
+//					}
+//				}
+//			}
+//			if(outputNode == null){
+//				outputNode = new Node(age);
+//				age++;
+//				nodes.add(xLoc+1, new ArrayList<Node>());
+//				nodes.get(xLoc+1).add(outputNode);
+//			}
+//			
+//			
+//			
+//			if(genome.active.get(i)){
+//				
+//			}
+//			
+//		}
+		
+		return new ANN(nodes, dendrites);
 		
 	}
 	

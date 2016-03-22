@@ -265,6 +265,8 @@ public class ANN extends JPanel implements KeyListener{
 			
 			this.update();
 			frame.repaint();
+			break;
+		case KeyEvent.VK_N:
 			Genome g = new Genome(this);
 			ANN ann = Genome.buildANN(g);
 			break;
