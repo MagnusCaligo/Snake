@@ -55,6 +55,21 @@ public class ANN extends JPanel implements KeyListener{
 		
 	}
 	
+	public ANN(ArrayList<ArrayList<Node>> nodes, ArrayList<Dendrite> dendrites){
+		
+		this.nodes = nodes;
+		this.dendrites = dendrites; 
+		frame = new JFrame();
+		
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(640, 480);
+		frame.setVisible(true);
+		
+		frame.add(this);
+		frame.addKeyListener(this);
+		this.setVisible(true);
+	}
+	
 	public void update(){
 		for(int x = 0; x < nodes.size(); x++){
 			for(int y = 0; y < nodes.get(x).size(); y++){
@@ -250,6 +265,8 @@ public class ANN extends JPanel implements KeyListener{
 			
 			this.update();
 			frame.repaint();
+			Genome g = new Genome(this);
+			ANN ann = Genome.buildANN(g);
 			break;
 		}
 		
