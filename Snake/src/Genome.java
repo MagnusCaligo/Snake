@@ -39,20 +39,20 @@ public class Genome {
 			for(Node n : inputNodes){
 				if(den.inputNode == n){
 					type.set(type.size()-1, 1);
-				}
-				for(Node m : outputNodes){
-					if(den.outputNode == m){
-						type.set(type.size()-1, 33);
+					for(Node m : outputNodes){
+						if(den.outputNode == m){
+							type.set(type.size()-1, 3);
+						}
 					}
 				}
 			}
 			for(Node n : outputNodes){
 				if(den.outputNode == n){
 					type.set(type.size()-1, 2);
-				}
-				for(Node m : inputNodes){
-					if(den.inputNode == m){
-						type.set(type.size()-1, 3);
+					for(Node m : inputNodes){
+						if(den.inputNode == m){
+							type.set(type.size()-1, 3);
+						}
 					}
 				}
 			}
@@ -69,6 +69,9 @@ public class Genome {
 		int age = 0;
 		
 		for(int i =0; i < genome.type.size(); i++){
+			if(!genome.active.get(i))
+				continue;
+			System.out.println(genome.type.get(i));
 			if(genome.type.get(i) == 1){
 				boolean created = false;
 				for(int m = 0; m < i; m++){
@@ -78,6 +81,7 @@ public class Genome {
 				if(!created){
 					if(nodes.size() ==0)
 						nodes.add(new ArrayList<Node>());
+					System.out.println("Creating 1");
 					nodes.get(0).add(new Node(age));
 					age++;
 				}	
@@ -91,6 +95,7 @@ public class Genome {
 				if(!created){
 					if(nodes.size() < 1)
 						nodes.add(new ArrayList<Node>());
+					System.out.println("Creating 2");
 					nodes.get(nodes.size()-1).add(new Node(age));
 					age++;
 				}
@@ -100,7 +105,7 @@ public class Genome {
 				boolean inputCreated = false;
 				boolean outputCreated = false;
 				
-				for(int m = 0; m < i; m++){
+				for(int m = 0; m < nodes.size(); m++){
 					if(genome.inputs.get(m) == genome.inputs.get(i))
 						inputCreated = true;
 				}
@@ -108,13 +113,18 @@ public class Genome {
 					if(genome.outputs.get(m) == genome.outputs.get(i))
 						outputCreated = true;
 				}
-				if(!inputCreated && nodes.size()-1 <0){
-					nodes.add(new ArrayList<Node>());
+				
+				if(!inputCreated){
+					if(nodes.size()-1 < 0)
+						nodes.add(new ArrayList<Node>());
 					nodes.get(0).add(new Node(age));
+					System.out.println("Creating 3 input");
 					age++;
 				}
-				if(!outputCreated && nodes.size()-1<0){
-					nodes.add(new ArrayList<Node>());				
+				if(!outputCreated){
+					if(nodes.size()-1 < 1)
+						nodes.add(new ArrayList<Node>());		
+					System.out.println("Creating 3 output");
 					nodes.get(nodes.size()-1).add(new Node(age));
 					age++;
 				}
