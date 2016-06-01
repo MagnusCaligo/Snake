@@ -37,4 +37,14 @@ public class Node {
 		input = new ArrayList<Double>();
 		return value;
 	}
+	
+	public double getValue(){
+		double value = 0;
+		for(double val : input){
+			value += val;
+		}
+		
+		value =  Math.tanh(value);
+		return value;
+	}
 }

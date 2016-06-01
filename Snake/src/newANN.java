@@ -37,6 +37,7 @@ public class newANN extends JPanel implements KeyListener{
 			Node n = this.addNewNode();
 			innovation--;
 			n.type = 1;
+			n.addToInput(10);
 		}
 		for(int i =0; i< outputs;i++){
 			Node n = this.addNewNode();
@@ -73,8 +74,15 @@ public class newANN extends JPanel implements KeyListener{
 	}
 	
 	public void update(){
-		for(int x = 0; x < nodes.size(); x++){
-			nodes.get(x).output();
+		ArrayList<ArrayList<Node>> updateNode = convertTo2D();
+		for(int x = 0; x < updateNode.size(); x++){
+			for(int y = 0; y < updateNode.get(x).size();y++){
+				updateNode.get(x).get(y).output();
+			}
+		}
+		int m = updateNode.size()-1;
+		for(int t = 0; t < 3; t++){
+			System.out.println(updateNode.get(m).get(t).getValue());
 		}
 	}
 	
@@ -146,6 +154,103 @@ public class newANN extends JPanel implements KeyListener{
 		g.setColor(Color.RED);
 		
 		
+		ArrayList<ArrayList<Node>> nodeDrawing = convertTo2D();
+
+		
+		int distX = frame.getWidth()/(nodeDrawing.size()+1);
+		
+		for(int i = 0; i < nodeDrawing.size(); i++){
+			int distY = frame.getHeight()/(nodeDrawing.get(i).size() +1);
+			for(int m = 0; m < nodeDrawing.get(i).size(); m++){
+				for(Dendrite d: nodeDrawing.get(i).get(m).outputs){
+					Node n = d.outputNode;
+								
+					for(int xN = 0; xN < nodeDrawing.size();xN++){
+						for(int yN =0; yN <nodeDrawing.get(xN).size(); yN++){
+							if(n==nodeDrawing.get(xN).get(yN) && d.active){
+								int dY = frame.getHeight()/(nodeDrawing.get(xN).size()+1);
+								g.setColor(Color.green);
+								g.drawLine(distX+(i*distX), distY+(m*distY), distX + (xN*distX), dY+(yN*dY));
+								
+								double xHalf = ((distX + (xN*distX)) - (distX+(i*distX)))*2/3;
+								double yHalf = ((dY+(yN*dY)) - (distY+(m*distY)))*2/3;
+								
+								
+								double angle = Math.atan(yHalf/xHalf);
+								
+								if(xHalf < 0){
+									angle-=Math.PI;
+								}
+								
+								xHalf += distX+(i*distX);
+								yHalf += distY+(m*distY);
+								
+								g.setColor(Color.MAGENTA);
+								
+								
+								double xVal = (xHalf)+(20*Math.cos(angle+2.61));
+								double yVal = (yHalf)+(20*Math.sin(angle+2.61));
+								g.drawLine((int)xHalf, (int)yHalf, (int) xVal, (int) yVal);
+								xVal = (xHalf)+(20*Math.cos(angle-2.61));
+								yVal = (yHalf)+(20*Math.sin(angle-2.61));
+								g.drawLine((int)xHalf, (int)yHalf, (int) xVal, (int) yVal);
+								
+								break;
+							}
+						}
+					}
+				}
+				
+				g.setColor(Color.RED);
+				if(nodeDrawing.get(i).get(m).type != 0)
+					g.setColor(Color.BLUE);
+				g.fillOval(distX + (i*distX)-25, distY+(m*distY)-25, 50, 50);
+			}
+		}
+	}
+	
+
+	public void keyPressed(KeyEvent event) {
+		switch(event.getKeyCode()){
+		case KeyEvent.VK_SPACE:
+			
+			double chance = Math.random();
+			if(chance>.5){
+				if(dendrites.size() == 0) break;
+				Dendrite den = dendrites.get((int)(Math.random()*dendrites.size()));
+				while(!den.active){
+					den = dendrites.get((int)(Math.random()*dendrites.size()));
+				}
+				this.addNodeAtDen(den);
+			}else if(chance >0){
+				this.addRandomDendrite();
+			}
+			
+			frame.repaint();
+			break;
+		case KeyEvent.VK_N:
+			Genome g = new Genome(this);
+			ANN ann = Genome.buildANN(g);
+			break;
+			
+		case KeyEvent.VK_P:
+			this.update();
+			break;
+		}
+		
+	}
+
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void keyTyped(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public ArrayList<ArrayList<Node>> convertTo2D(){
 		ArrayList<ArrayList<Node>> nodeDrawing = new ArrayList<ArrayList<Node>>();
 		nodeDrawing.add(new ArrayList<Node>());
 		
@@ -195,89 +300,8 @@ public class newANN extends JPanel implements KeyListener{
 		for(int i = 0; i < nodes.size(); i++){
 			nodes.get(i).beenDrawn = false;
 		}
-		
-		int distX = frame.getWidth()/(nodeDrawing.size()+1);
-		
-		for(int i = 0; i < nodeDrawing.size(); i++){
-			int distY = frame.getHeight()/(nodeDrawing.get(i).size() +1);
-			for(int m = 0; m < nodeDrawing.get(i).size(); m++){
-				for(Dendrite d: nodeDrawing.get(i).get(m).outputs){
-					Node n = d.outputNode;
-								
-					for(int xN = 0; xN < nodeDrawing.size();xN++){
-						for(int yN =0; yN <nodeDrawing.get(xN).size(); yN++){
-							if(n==nodeDrawing.get(xN).get(yN) && d.active){
-								int dY = frame.getHeight()/(nodeDrawing.get(xN).size()+1);
-								g.setColor(Color.green);
-								g.drawLine(distX+(i*distX), distY+(m*distY), distX + (xN*distX), dY+(yN*dY));
-								
-								double xHalf = ((distX + (xN*distX)) - (distX+(i*distX)))*2/3;
-								double yHalf = ((dY+(yN*dY)) - (distY+(m*distY)))*2/3;
-								
-								
-								double angle = Math.atan(yHalf/xHalf);
-								
-								xHalf += distX+(i*distX);
-								yHalf += distY+(m*distY);
-								
-								g.setColor(Color.MAGENTA);
-								double xVal = (xHalf)+(20*Math.cos(angle+2.61));
-								double yVal = (yHalf)+(20*Math.sin(angle+2.61));
-								g.drawLine((int)xHalf, (int)yHalf, (int) xVal, (int) yVal);
-								xVal = (xHalf)+(20*Math.cos(angle-2.61));
-								yVal = (yHalf)+(20*Math.sin(angle-2.61));
-								g.drawLine((int)xHalf, (int)yHalf, (int) xVal, (int) yVal);
-								
-								break;
-							}
-						}
-					}
-				}
-				
-				g.setColor(Color.RED);
-				if(nodeDrawing.get(i).get(m).type != 0)
-					g.setColor(Color.BLUE);
-				g.fillOval(distX + (i*distX)-25, distY+(m*distY)-25, 50, 50);
-			}
-		}
-	}
 	
+	return nodeDrawing;
 
-	public void keyPressed(KeyEvent event) {
-		switch(event.getKeyCode()){
-		case KeyEvent.VK_SPACE:
-			
-			double chance = Math.random();
-			if(chance>.5){
-				if(dendrites.size() == 0) break;
-				Dendrite den = dendrites.get((int)(Math.random()*dendrites.size()));
-				while(!den.active){
-					den = dendrites.get((int)(Math.random()*dendrites.size()));
-				}
-				this.addNodeAtDen(den);
-			}else if(chance >0){
-				this.addRandomDendrite();
-			}
-			
-			this.update();
-			frame.repaint();
-			break;
-		case KeyEvent.VK_N:
-			Genome g = new Genome(this);
-			ANN ann = Genome.buildANN(g);
-			break;
-		}
-		
 	}
-
-	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void keyTyped(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
