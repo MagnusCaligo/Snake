@@ -234,6 +234,20 @@ public class ANN extends JPanel implements KeyListener{
 							if(n==nodes.get(xN).get(yN) && d.active){
 								int dY = frame.getHeight()/(nodes.get(xN).size()+1);
 								g.setColor(Color.green);
+								
+								int inputX = 0;
+								int outputX = 0;
+								for(int x = 0; x < nodes.size();x++){
+									for(int y = 0; y < nodes.get(x).size(); y++){
+										if(d.inputNode == nodes.get(x).get(y))
+											inputX = x;
+										if(d.outputNode == nodes.get(x).get(y))
+											outputX = x;
+									}
+								}
+								if(outputX - inputX > 1)
+									g.setColor(Color.blue);
+								
 								g.drawLine(distX+(i*distX), distY+(m*distY), distX + (xN*distX), dY+(yN*dY));
 								break;
 							}
@@ -253,7 +267,7 @@ public class ANN extends JPanel implements KeyListener{
 		case KeyEvent.VK_SPACE:
 			
 			double chance = Math.random();
-			if(chance>.9){
+			if(chance <.5){
 				Dendrite den = dendrites.get((int)(Math.random()*dendrites.size()));
 				while(!den.active){
 					den = dendrites.get((int)(Math.random()*dendrites.size()));
