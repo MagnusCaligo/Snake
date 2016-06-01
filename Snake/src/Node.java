@@ -4,9 +4,11 @@ public class Node {
 	public ArrayList<Double> input;
 	public ArrayList<Dendrite> outputs;
 	public int age;
+	public boolean beenDrawn = false;
+	public int type; //0 = Hidden, 1 = Input, 2 = Output
 	
 	public Node(int a){
-		
+		type = 0;
 		input = new ArrayList<Double>();
 		outputs = new ArrayList<Dendrite>();
 		age = a;
