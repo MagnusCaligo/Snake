@@ -13,10 +13,10 @@ public class newANN extends JPanel implements KeyListener{
 	public ArrayList<Dendrite> dendrites;
 	
 	private JFrame frame;
-	private int inputs;
-	private int outputs;
-	private int innovation;
-	private int nodeAge;
+	public int inputs;
+	public int outputs;
+	public int innovation;
+	public int nodeAge;
 	
 	
 	public static void main(String args[]){
@@ -58,10 +58,12 @@ public class newANN extends JPanel implements KeyListener{
 		
 	}
 	
-	public newANN(ArrayList<Node> nodes, ArrayList<Dendrite> dendrites){
+	public newANN(ArrayList<Node> nodes, ArrayList<Dendrite> dendrites, int i, int o){
 		
 		this.nodes = nodes;
 		this.dendrites = dendrites; 
+		this.inputs = i;
+		this.outputs = o;
 		frame = new JFrame();
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -223,14 +225,15 @@ public class newANN extends JPanel implements KeyListener{
 				}
 				this.addNodeAtDen(den);
 			}else if(chance >0){
-				this.addRandomDendrite();
+				this.addRandomDendrite();     
 			}
 			
 			frame.repaint();
 			break;
 		case KeyEvent.VK_N:
+			
 			Genome g = new Genome(this);
-			ANN ann = Genome.buildANN(g);
+			newANN ann = Genome.buildNewANN(g);
 			break;
 			
 		case KeyEvent.VK_P:
@@ -303,5 +306,9 @@ public class newANN extends JPanel implements KeyListener{
 	
 	return nodeDrawing;
 
+	}
+	
+	public int getLastInnovation(){
+		return innovation;
 	}
 }
