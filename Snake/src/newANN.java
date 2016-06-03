@@ -66,7 +66,7 @@ public class newANN extends JPanel implements KeyListener{
 		this.outputs = o;
 		frame = new JFrame();
 		
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(640, 480);
 		frame.setVisible(true);
 		
