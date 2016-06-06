@@ -4,12 +4,13 @@ public class Dendrite {
 	public Node inputNode;
 	public Node outputNode;
 	public boolean active;
+	public boolean updated = false;
 	public int age;
 	
 	public Dendrite(Node m,Node n, int a){
 		inputNode = m;
 		outputNode = n;
-		weight = Math.random();
+		weight = (Math.random()*2)-1;
 		active = true;
 		age = a;
 	}

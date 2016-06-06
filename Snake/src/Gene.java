@@ -15,9 +15,4 @@ public class Gene{
 		active = a;
 	}
 	
-	
-	public static void combineGenes(){
-		
-	}
-	
 }

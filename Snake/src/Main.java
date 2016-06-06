@@ -46,7 +46,7 @@ public class Main extends JPanel implements KeyListener{
 				snake = new Snake();
 			
 			try{
-				Thread.sleep(100);
+				Thread.sleep(1);
 			}
 			catch(Exception e){}
 			

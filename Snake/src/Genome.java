@@ -70,7 +70,12 @@ public class Genome {
 		}
 		
 		newANN ann= new newANN(nodes,dendrites,g.numInputs,g.numOutputs);
-		ann.innovation = g.getGenes().get(g.getGenes().size()-1).innovation;
+		ann.inputs = g.numInputs;
+		ann.outputs = g.numOutputs;
+		if(g.getGenes().size() != 0)
+			ann.innovation = g.getGenes().get(g.getGenes().size()-1).innovation;
+		else
+			ann.innovation = 0;
 		ann.nodeAge = nodeAge;
 		return ann;
 	}
@@ -84,9 +89,6 @@ public class Genome {
 	public static newANN breedNewAnn(Genome network1, Genome network2){
 		int innovation = network1.getGenes().size();
 		ArrayList<Gene> genes = new ArrayList<Gene>();
-		
-		ArrayList<Gene> gg1 = network1.getGenes();
-		ArrayList<Gene> gg2 = network2.getGenes();
 		
 		int net1loc = 0;
 		int net2loc = 0;
@@ -115,11 +117,37 @@ public class Genome {
 				net1loc++;
 				net2loc++;
 			}
+			double rand = Math.random();
+			if(rand >=.9){
+				double val = genes.get(genes.size()-1).weight;
+				double amt = Math.random() * 2;
+				amt--;
+				if(amt == 0) amt = 1;
+				double percent = .10 * amt;
+				val *= percent;
+				genes.get(genes.size()-1).weight += val;
+				System.out.println("Dendrite weight changed to: " + genes.get(genes.size()-1).weight);
+			}
 		}
 		
 		Genome genome = new Genome(genes, network1.numInputs, network1.numOutputs);
 		
-		return Genome.buildNewANN(genome);
+		newANN ann = Genome.buildNewANN(genome);
+		ann.setVisible(true);
+		
+		double rand = Math.random();
+		if(rand>=.9){
+			System.out.println("Mutation has Occured");
+			rand = Math.random();
+			if(rand<=.6){
+				System.out.println("New Dendrite");
+				ann.addRandomDendrite();
+			}else if(rand>.6){
+				ann.addRandomNode();
+			}
+		}
+		
+		return ann;
 	}
 	
 	

@@ -4,40 +4,36 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class newANN extends JPanel implements KeyListener{
+public class newANN extends JPanel implements KeyListener, Comparable{
 	
 	public ArrayList<Node> nodes;
 	public ArrayList<Dendrite> dendrites;
 	
-	private JFrame frame;
 	public int inputs;
 	public int outputs;
 	public int innovation;
 	public int nodeAge;
+	public double fitness= 0;
 	
 	
 	public static void main(String args[]){
-		newANN n = new newANN();
+		//newANN n = new newANN();
 	}
 	
-	public newANN(){
-	
-		
+	public newANN(int in, int out){		
 		nodes = new ArrayList<Node>();
 		
 		dendrites = new ArrayList<Dendrite>();
 		
-		inputs = 3;
-		outputs = 3;
+		inputs = in;
+		outputs = out;
 		
 		for(int i = 0; i<inputs;i++){
 			Node n = this.addNewNode();
 			innovation--;
 			n.type = 1;
-			n.addToInput(10);
 		}
 		for(int i =0; i< outputs;i++){
 			Node n = this.addNewNode();
@@ -45,15 +41,7 @@ public class newANN extends JPanel implements KeyListener{
 			n.type = 2;
 		}
 
-		
-		frame = new JFrame();
-		
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(640, 480);
-		frame.setVisible(true);
-		
-		frame.add(this);
-		frame.addKeyListener(this);
+
 		this.setVisible(true);
 		
 	}
@@ -64,27 +52,32 @@ public class newANN extends JPanel implements KeyListener{
 		this.dendrites = dendrites; 
 		this.inputs = i;
 		this.outputs = o;
-		frame = new JFrame();
-		
-		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(640, 480);
-		frame.setVisible(true);
-		
-		frame.add(this);
-		frame.addKeyListener(this);
+
 		this.setVisible(true);
 	}
 	
-	public void update(){
-		ArrayList<ArrayList<Node>> updateNode = convertTo2D();
-		for(int x = 0; x < updateNode.size(); x++){
-			for(int y = 0; y < updateNode.get(x).size();y++){
-				updateNode.get(x).get(y).output();
+	public void update(Node node){
+		double value = 0;
+		for(double v: node.input)
+			value +=v;
+		if(node.type!=1)
+			value = Math.tanh(value);
+		
+		if(node.type==2)
+			node.finalValue += value;
+		
+		for(Dendrite den : node.outputs){
+			if(den.updated == false){
+				den.updated = true;
+				den.getInput(value);
+				this.update(den.outputNode);
 			}
 		}
-		int m = updateNode.size()-1;
-		for(int t = 0; t < 3; t++){
-			System.out.println(updateNode.get(m).get(t).getValue());
+		node.input = new ArrayList<Double>();
+		if(node.type== 1){
+			for(Dendrite den : dendrites){
+				den.updated = false;
+			}
 		}
 	}
 	
@@ -94,6 +87,26 @@ public class newANN extends JPanel implements KeyListener{
 		nodeAge++;
 		innovation++;
 		return n;
+	}
+	
+	public double[] getOutput(){
+		double[] values = new double[this.outputs];
+		int size = 0;
+		for(int i = this.inputs; i < this.outputs+this.inputs; i++){
+			values[size] = nodes.get(i).finalValue;
+			size++;
+		}
+		return values;
+	}
+	
+	public void addInputs(double[] inputs){
+		for(Node n : nodes){
+			n.finalValue = 0;
+		}
+		for(int i = 0; i < this.inputs; i++){
+			nodes.get(i).input.add(inputs[i]);
+			this.update(nodes.get(i));
+		}
 	}
 	
 	public void addNodeAtDen(Dendrite den){
@@ -118,6 +131,12 @@ public class newANN extends JPanel implements KeyListener{
 		dendrites.add(newInput);
 		dendrites.add(newOutput);
 
+	}
+	
+	public void addRandomNode(){
+		if(dendrites.size() == 0) return;
+		Dendrite den = dendrites.get((int)(Math.random() * dendrites.size()));
+		this.addNodeAtDen(den);
 	}
 	
 	public void addRandomDendrite(){
@@ -159,10 +178,10 @@ public class newANN extends JPanel implements KeyListener{
 		ArrayList<ArrayList<Node>> nodeDrawing = convertTo2D();
 
 		
-		int distX = frame.getWidth()/(nodeDrawing.size()+1);
+		int distX = this.getWidth()/(nodeDrawing.size()+1);
 		
 		for(int i = 0; i < nodeDrawing.size(); i++){
-			int distY = frame.getHeight()/(nodeDrawing.get(i).size() +1);
+			int distY = this.getHeight()/(nodeDrawing.get(i).size() +1);
 			for(int m = 0; m < nodeDrawing.get(i).size(); m++){
 				for(Dendrite d: nodeDrawing.get(i).get(m).outputs){
 					Node n = d.outputNode;
@@ -170,7 +189,7 @@ public class newANN extends JPanel implements KeyListener{
 					for(int xN = 0; xN < nodeDrawing.size();xN++){
 						for(int yN =0; yN <nodeDrawing.get(xN).size(); yN++){
 							if(n==nodeDrawing.get(xN).get(yN) && d.active){
-								int dY = frame.getHeight()/(nodeDrawing.get(xN).size()+1);
+								int dY = this.getHeight()/(nodeDrawing.get(xN).size()+1);
 								g.setColor(Color.green);
 								g.drawLine(distX+(i*distX), distY+(m*distY), distX + (xN*distX), dY+(yN*dY));
 								
@@ -228,16 +247,11 @@ public class newANN extends JPanel implements KeyListener{
 				this.addRandomDendrite();     
 			}
 			
-			frame.repaint();
+			this.repaint();
 			break;
 		case KeyEvent.VK_N:
-			
 			Genome g = new Genome(this);
 			newANN ann = Genome.buildNewANN(g);
-			break;
-			
-		case KeyEvent.VK_P:
-			this.update();
 			break;
 		}
 		
@@ -310,5 +324,12 @@ public class newANN extends JPanel implements KeyListener{
 	
 	public int getLastInnovation(){
 		return innovation;
+	}
+
+	public int compareTo(Object ann) {
+		double compareage=((newANN)ann).fitness;
+		compareage*=100;
+        /* For Descending order do like this */
+        return (int) (compareage-(this.fitness*100));
 	}
 }

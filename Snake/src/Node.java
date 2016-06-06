@@ -6,6 +6,7 @@ public class Node {
 	public int age;
 	public boolean beenDrawn = false;
 	public int type; //0 = Hidden, 1 = Input, 2 = Output
+	public double finalValue;
 	
 	public Node(int a){
 		type = 0;
