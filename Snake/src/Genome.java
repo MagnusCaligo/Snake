@@ -1,17 +1,20 @@
 import java.util.ArrayList;
 
-public class Genome {
+public class Genome<T extends NEATInterface> {
 
 	private ArrayList<Gene> genes;
 	private int numInputs;
 	private int numOutputs;
+	public double fitness;
+	public T parent;
 	
 	
-	
-	public Genome(newANN network){
+	public Genome(newANN<T> network){
 		genes = new ArrayList<Gene>();
 		numInputs = network.inputs;
 		numOutputs = network.outputs;
+		fitness = network.fitness;
+		this.parent = network.parent;
 		
 		for(int i =0; i < network.dendrites.size(); i++){
 			Dendrite d = network.dendrites.get(i);
@@ -23,7 +26,7 @@ public class Genome {
 
 	}
 	
-	public static newANN buildNewANN(Genome g){
+	public static <T extends NEATInterface> newANN<T> buildNewANN(Genome<T> g){
 		//return null;
 		
 		ArrayList<Node> nodes = new ArrayList<Node>();
@@ -69,7 +72,7 @@ public class Genome {
 			
 		}
 		
-		newANN ann= new newANN(nodes,dendrites,g.numInputs,g.numOutputs);
+		newANN<T> ann= new newANN<T>(nodes,dendrites,g.numInputs,g.numOutputs, g.parent);
 		ann.inputs = g.numInputs;
 		ann.outputs = g.numOutputs;
 		if(g.getGenes().size() != 0)
@@ -80,13 +83,14 @@ public class Genome {
 		return ann;
 	}
 	
-	public Genome(ArrayList<Gene> genes, int inputs, int outputs){
+	public Genome(ArrayList<Gene> genes, int inputs, int outputs, T parent){
 		this.genes = genes;
 		this.numInputs = inputs;
 		this.numOutputs = outputs;
+		this.parent = parent;
 	}
 	
-	public static newANN breedNewAnn(Genome network1, Genome network2){
+	public static <T extends NEATInterface> newANN<T> breedNewAnn(Genome<T> network1, Genome<T> network2){
 		int innovation = network1.getGenes().size();
 		ArrayList<Gene> genes = new ArrayList<Gene>();
 		
@@ -122,25 +126,28 @@ public class Genome {
 				double val = genes.get(genes.size()-1).weight;
 				double amt = Math.random() * 2;
 				amt--;
-				if(amt == 0) amt = 1;
-				double percent = .10 * amt;
+				if(amt <0) amt = -1;
+				if(amt > 0) amt = 1;
+				double percent = .20 * amt;
 				val *= percent;
 				genes.get(genes.size()-1).weight += val;
-				System.out.println("Dendrite weight changed to: " + genes.get(genes.size()-1).weight);
 			}
 		}
 		
-		Genome genome = new Genome(genes, network1.numInputs, network1.numOutputs);
+		Genome<T> genome = new Genome<T>(genes, network1.numInputs, network1.numOutputs, network1.parent);
 		
-		newANN ann = Genome.buildNewANN(genome);
+		newANN<T> ann = Genome.buildNewANN(genome);
+		double fit = network1.fitness + network2.fitness;
+		fit /=2;
+		ann.parentsFitness = fit;
 		ann.setVisible(true);
 		
 		double rand = Math.random();
-		if(rand>=.9){
+		if(rand>=.6){
 			System.out.println("Mutation has Occured");
 			rand = Math.random();
 			if(rand<=.6){
-				System.out.println("New Dendrite");
+				//System.out.println("New Dendrite");
 				ann.addRandomDendrite();
 			}else if(rand>.6){
 				ann.addRandomNode();

@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-public class newANN extends JPanel implements KeyListener, Comparable{
+@SuppressWarnings("serial")
+public class newANN<T extends NEATInterface> extends JPanel implements KeyListener, Comparable<newANN>{
 	
 	public ArrayList<Node> nodes;
 	public ArrayList<Dendrite> dendrites;
@@ -16,15 +17,12 @@ public class newANN extends JPanel implements KeyListener, Comparable{
 	public int innovation;
 	public int nodeAge;
 	public double fitness= 0;
-	
-	
-	public static void main(String args[]){
-		//newANN n = new newANN();
-	}
-	
-	public newANN(int in, int out){		
+	public double parentsFitness = 0;
+	public T parent;
+
+	public newANN(int in, int out, T parent){		
 		nodes = new ArrayList<Node>();
-		
+		this.parent = parent;
 		dendrites = new ArrayList<Dendrite>();
 		
 		inputs = in;
@@ -46,14 +44,37 @@ public class newANN extends JPanel implements KeyListener, Comparable{
 		
 	}
 	
-	public newANN(ArrayList<Node> nodes, ArrayList<Dendrite> dendrites, int i, int o){
+	public newANN(ArrayList<Node> nodes, ArrayList<Dendrite> dendrites, int i, int o, T parent){
 		
 		this.nodes = nodes;
 		this.dendrites = dendrites; 
 		this.inputs = i;
 		this.outputs = o;
+		this.parent = parent;
 
 		this.setVisible(true);
+	}
+	
+	public void update(){
+		ArrayList<ArrayList<Node>> nodes2d = this.convertTo2D();
+		
+		for(int x = 0; x < nodes2d.size(); x++){
+			for(int y = 0; y < nodes2d.get(x).size(); y++){
+				double value = 0;
+				for(double v: nodes2d.get(x).get(y).input)
+					value +=v;
+				if(nodes2d.get(x).get(y).type!=1)
+					value = Math.tanh(value);
+				if(nodes2d.get(x).get(y).type==2)
+					nodes2d.get(x).get(y).finalValue += value;
+				for(Dendrite den : nodes2d.get(x).get(y).outputs){
+					if(den.active)
+						den.getInput(value);
+				}
+				nodes2d.get(x).get(y).input = new ArrayList<Double>();
+			}
+		}
+		
 	}
 	
 	public void update(Node node){
@@ -105,19 +126,17 @@ public class newANN extends JPanel implements KeyListener, Comparable{
 		}
 		for(int i = 0; i < this.inputs; i++){
 			nodes.get(i).input.add(inputs[i]);
-			this.update(nodes.get(i));
+			//this.update(nodes.get(i));
 		}
+		this.update();
 	}
 	
 	public void addNodeAtDen(Dendrite den){
 		if(!den.active)
 			return;
-		double inputX = den.inputNode.age;
-		double outputX = den.outputNode.age;
 		
 	
 		den.active = false;
-		double xDif = outputX - inputX;
 		
 		
 		Node newNode = this.addNewNode();
@@ -251,7 +270,7 @@ public class newANN extends JPanel implements KeyListener, Comparable{
 			break;
 		case KeyEvent.VK_N:
 			Genome g = new Genome(this);
-			newANN ann = Genome.buildNewANN(g);
+			Genome.buildNewANN(g);
 			break;
 		}
 		
@@ -282,7 +301,6 @@ public class newANN extends JPanel implements KeyListener, Comparable{
 			nodeDrawing.add(new ArrayList<Node>());
 			
 			for(int i = nodeDrawing.get(column).size()-1; i >= 0; i--){
-				Node n = nodeDrawing.get(column).get(i);
 				boolean nextColumn = false;
 				if(nodeDrawing.get(column).get(i).type == 2) nextColumn = true;
 				for(int m = 0; m < nodeDrawing.get(column).size(); m++){
@@ -326,10 +344,13 @@ public class newANN extends JPanel implements KeyListener, Comparable{
 		return innovation;
 	}
 
-	public int compareTo(Object ann) {
-		double compareage=((newANN)ann).fitness;
-		compareage*=100;
-        /* For Descending order do like this */
-        return (int) (compareage-(this.fitness*100));
+	public int compareTo(newANN ann) {
+		double other=(ann).fitness;
+		if(this.fitness < other)
+			return 1;
+		if(this.fitness > other)
+			return -1;
+		else
+			return 0;
 	}
 }

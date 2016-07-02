@@ -10,7 +10,7 @@ public class Dendrite {
 	public Dendrite(Node m,Node n, int a){
 		inputNode = m;
 		outputNode = n;
-		weight = (Math.random()*2)-1;
+		weight = (Math.random()*20)-10;
 		active = true;
 		age = a;
 	}
